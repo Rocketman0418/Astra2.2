@@ -243,10 +243,11 @@ export const useChats = () => {
 
   // Create a new conversation and clear current messages
   const startNewConversation = useCallback(() => {
-    const newConversationId = createNewConversation();
+    const newConversationId = uuidv4();
+    setCurrentConversationId(newConversationId);
     setCurrentMessages([]);
     return newConversationId;
-  }, [createNewConversation]);
+  }, []);
   // Initialize conversations when user logs in
   useEffect(() => {
     if (user) {

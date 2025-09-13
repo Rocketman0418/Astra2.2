@@ -20,7 +20,8 @@ export const ChatContainer: React.FC = () => {
     sendMessage,
     toggleMessageExpansion,
     messagesEndRef,
-    loadConversation
+    loadConversation,
+    startNewConversation
   } = useChat();
 
   const {
@@ -102,6 +103,7 @@ export const ChatContainer: React.FC = () => {
         isOpen={sidebarOpen} 
         onClose={() => setSidebarOpen(false)}
         onLoadConversation={loadConversation}
+        onStartNewConversation={startNewConversation}
       />
       
       <div className={`flex flex-col h-screen transition-all duration-300 ${sidebarOpen ? 'lg:ml-80' : ''}`}>

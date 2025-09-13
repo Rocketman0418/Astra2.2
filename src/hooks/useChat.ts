@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 const WEBHOOK_URL = 'https://healthrocket.app.n8n.cloud/webhook/8ec404be-7f51-47c8-8faf-0d139bd4c5e9/chat';
 
 export const useChat = () => {
-  const { logChatMessage, currentMessages, currentConversationId, loading: chatsLoading, loadConversation } = useChats();
+  const { logChatMessage, currentMessages, currentConversationId, loading: chatsLoading, loadConversation, startNewConversation: chatsStartNewConversation } = useChats();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
@@ -60,7 +60,7 @@ export const useChat = () => {
         },
         ...uiMessages
       ]);
-    } else {
+    } else if (currentConversationId) {
       // Reset to welcome message for new conversations
       console.log('useChat: Resetting to welcome message');
       setMessages([
@@ -167,6 +167,13 @@ export const useChat = () => {
     );
   }, []);
 
+  const startNewConversation = useCallback(() => {
+    console.log('useChat: Starting new conversation');
+    const newConversationId = chatsStartNewConversation();
+    console.log('useChat: New conversation ID:', newConversationId);
+    return newConversationId;
+  }, [chatsStartNewConversation]);
+
   return {
     messages,
     isLoading,
@@ -177,6 +184,7 @@ export const useChat = () => {
     messagesEndRef,
     setMessages,
     currentConversationId,
-    loadConversation
+    loadConversation,
+    startNewConversation
   };
 };

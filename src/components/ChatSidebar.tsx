@@ -7,15 +7,15 @@ interface ChatSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   onLoadConversation: (conversationId: string) => void;
+  onStartNewConversation: () => void;
 }
 
-export const ChatSidebar: React.FC<ChatSidebarProps> = ({ isOpen, onClose, onLoadConversation }) => {
+export const ChatSidebar: React.FC<ChatSidebarProps> = ({ isOpen, onClose, onLoadConversation, onStartNewConversation }) => {
   const { user, signOut } = useAuth();
   const {
     conversations,
     currentConversationId,
     deleteConversation,
-    startNewConversation,
     loading
   } = useChats();
   
@@ -28,7 +28,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ isOpen, onClose, onLoa
   );
 
   const handleNewChat = () => {
-    startNewConversation();
+    onStartNewConversation();
     onClose();
   };
 
