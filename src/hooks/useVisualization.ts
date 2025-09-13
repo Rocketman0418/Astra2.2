@@ -6,8 +6,8 @@ export const useVisualization = (updateVisualizationStatus?: (messageId: string,
   const [visualizations, setVisualizations] = useState<Record<string, VisualizationState>>({});
   const [currentVisualization, setCurrentVisualization] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [scrollToMessageId, setScrollToMessageId] = useState<string | null>(null);
-  const [messageIdToScrollTo, setMessageIdToScrollTo] = useState<string | null>(null);
+  const [savedScrollPosition, setSavedScrollPosition] = useState<number>(0);
+  const [messageToHighlight, setMessageToHighlight] = useState<string | null>(null);
 
   const generateVisualization = useCallback(async (messageId: string, messageText: string) => {
     setIsGenerating(true);
@@ -140,7 +140,12 @@ Return only the HTML code - no other text or formatting.`;
   }, []);
 
   const showVisualization = useCallback((messageId: string) => {
-    setMessageIdToScrollTo(messageId);
+    // Save current scroll position before showing visualization
+    const scrollContainer = document.querySelector('.chat-messages-container');
+    if (scrollContainer) {
+      setSavedScrollPosition(scrollContainer.scrollTop);
+    }
+    setMessageToHighlight(messageId);
     setCurrentVisualization(messageId);
     setVisualizations(prev => ({
       ...prev,
@@ -152,19 +157,38 @@ Return only the HTML code - no other text or formatting.`;
   }, []);
 
   const hideVisualization = useCallback(() => {
-    if (messageIdToScrollTo) {
-      setScrollToMessageId(messageIdToScrollTo);
-    }
     setCurrentVisualization(null);
+    
+    // Restore scroll position after a short delay
+    setTimeout(() => {
+      const scrollContainer = document.querySelector('.chat-messages-container');
+      if (scrollContainer && savedScrollPosition > 0) {
+        scrollContainer.scrollTo({
+          top: savedScrollPosition,
+          behavior: 'smooth'
+        });
+      }
+      
+      // Highlight the message briefly
+      if (messageToHighlight) {
+        const messageElement = document.getElementById(`message-${messageToHighlight}`);
+        if (messageElement) {
+          messageElement.classList.add('message-highlight');
+          setTimeout(() => {
+            messageElement.classList.remove('message-highlight');
+          }, 3000);
+        }
+      }
+    }, 100);
   }, [messageIdToScrollTo]);
 
   const getVisualization = useCallback((messageId: string) => {
     return visualizations[messageId] || null;
   }, [visualizations]);
 
-  const clearScrollToMessage = useCallback(() => {
-    setScrollToMessageId(null);
-    setMessageIdToScrollTo(null);
+  const clearHighlight = useCallback(() => {
+    setMessageToHighlight(null);
+    setSavedScrollPosition(0);
   }, []);
   
   return {
@@ -174,7 +198,7 @@ Return only the HTML code - no other text or formatting.`;
     getVisualization,
     currentVisualization,
     isGenerating,
-    scrollToMessageId,
-    clearScrollToMessage
+    messageToHighlight,
+    clearHighlight
   };
 };

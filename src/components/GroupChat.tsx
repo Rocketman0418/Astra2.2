@@ -45,8 +45,8 @@ export const GroupChat: React.FC = () => {
     hideVisualization,
     currentVisualization,
     getVisualization,
-    scrollToMessageId,
-    clearScrollToMessage
+    messageToHighlight,
+    clearHighlight
   } = useVisualization();
 
   // Fetch users for mentions
@@ -88,23 +88,13 @@ export const GroupChat: React.FC = () => {
 
   // Auto-scroll to bottom
   useEffect(() => {
-    // If we need to scroll to a specific message, do that instead
-    if (scrollToMessageId) {
+    // Only auto-scroll to bottom if we're not highlighting a specific message
+    if (!messageToHighlight) {
       setTimeout(() => {
-        const messageElement = document.getElementById(`message-${scrollToMessageId}`);
-        if (messageElement) {
-          messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          clearScrollToMessage();
-        }
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
-      return;
     }
-    
-    // Otherwise, always scroll to bottom when messages change, Astra is thinking, or visualization states change
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-  }, [messages, isAstraThinking, visualizationStates, scrollToMessageId, clearScrollToMessage]);
+  }, [messages, isAstraThinking, visualizationStates, messageToHighlight]);
 
   // Also scroll to bottom when component mounts
   useEffect(() => {
@@ -344,7 +334,7 @@ export const GroupChat: React.FC = () => {
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-1">
+      <div className="flex-1 overflow-y-auto p-4 space-y-1 chat-messages-container">
         {loading ? (
           <div className="flex items-center justify-center h-32">
             <div className="text-center">

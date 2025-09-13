@@ -45,8 +45,8 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
     hideVisualization,
     getVisualization: getHookVisualization,
     currentVisualization,
-    scrollToMessageId,
-    clearScrollToMessage
+    messageToHighlight,
+    clearHighlight
   } = useVisualization(updateVisualizationStatus);
   // Register service worker for PWA
   // Handle conversation loading from sidebar
@@ -135,31 +135,23 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
 
   // Handle viewport adjustments for mobile keyboards
   useEffect(() => {
-    // If we need to scroll to a specific message, do that instead
-    if (scrollToMessageId) {
-      setTimeout(() => {
-        const messageElement = document.getElementById(`message-${scrollToMessageId}`);
-        if (messageElement) {
-          messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          clearScrollToMessage();
-        }
-      }, 100);
-      return;
+    // Only auto-scroll to bottom if we're not highlighting a specific message
+    if (!messageToHighlight) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-    
-    // Otherwise, scroll to bottom when messages change
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     
     const handleResize = () => {
       // Force scroll to bottom when keyboard appears/disappears
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+      if (!messageToHighlight) {
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [messagesEndRef, messages, scrollToMessageId, clearScrollToMessage]);
+  }, [messagesEndRef, messages, messageToHighlight]);
 
   // Show visualization view if one is currently active
   if (currentVisualization) {
@@ -176,7 +168,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto pb-20 md:pb-24 px-3 md:px-4">
+      <div className="flex-1 overflow-y-auto pb-20 md:pb-24 px-3 md:px-4 chat-messages-container">
         <div className="max-w-4xl mx-auto space-y-3 md:space-y-4 pt-4">
           {messages.map((message) => (
             <div key={message.id} id={`message-${message.id}`}>

@@ -89,6 +89,25 @@
       background-position: 0% 50%;
     }
   }
+
+  /* Message highlight animation */
+  .message-highlight {
+    animation: messageHighlight 3s ease-in-out;
+  }
+
+  @keyframes messageHighlight {
+    0% {
+      background-color: rgba(59, 130, 246, 0.3);
+      transform: scale(1.02);
+    }
+    50% {
+      background-color: rgba(59, 130, 246, 0.2);
+    }
+    100% {
+      background-color: transparent;
+      transform: scale(1);
+    }
+  }
 }
 
 /* PWA specific styles */
