@@ -164,6 +164,7 @@ Return only the HTML code - no other text or formatting.`;
 
   const clearScrollToMessage = useCallback(() => {
     setScrollToMessageId(null);
+    setMessageIdToScrollTo(null);
   }, []);
   
   return {
