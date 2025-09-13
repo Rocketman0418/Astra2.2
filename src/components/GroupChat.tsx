@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Search, Users, X } from 'lucide-react';
 import { GroupMessage } from './GroupMessage';
 import { MentionInput } from './MentionInput';
@@ -108,7 +108,7 @@ export const GroupChat: React.FC = () => {
   };
 
   // Handle visualization creation
-  const handleCreateVisualization = useCallback(async (messageId: string, messageContent: string) => {
+  const handleCreateVisualization = async (messageId: string, messageContent: string) => {
     console.log('🎯 Starting visualization generation for message:', messageId);
     
     // Set generating state immediately
@@ -154,19 +154,6 @@ export const GroupChat: React.FC = () => {
         ...prev,
         [messageId]: { isGenerating: false, content: null }
       }));
-    }
-  }, [generateVisualization, getVisualization, updateVisualizationData]);
-    
-    // Update state after generation
-    const visualization = getVisualization(messageId);
-    if (visualization?.content) {
-      setVisualizationStates(prev => ({
-        ...prev,
-        [messageId]: { isGenerating: false, content: visualization.content }
-      }));
-      
-      // Update the database with visualization data
-      await updateVisualizationData(messageId, visualization.content);
     }
   };
 
