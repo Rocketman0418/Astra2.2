@@ -19,7 +19,8 @@ export const ChatContainer: React.FC = () => {
     setInputValue,
     sendMessage,
     toggleMessageExpansion,
-    messagesEndRef
+    messagesEndRef,
+    loadConversation
   } = useChat();
 
   const {
@@ -97,7 +98,11 @@ export const ChatContainer: React.FC = () => {
   }
   return (
     <div className="flex flex-col h-screen bg-gray-900">
-      <ChatSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <ChatSidebar 
+        isOpen={sidebarOpen} 
+        onClose={() => setSidebarOpen(false)}
+        onLoadConversation={loadConversation}
+      />
       
       <div className={`flex flex-col h-screen transition-all duration-300 ${sidebarOpen ? 'lg:ml-80' : ''}`}>
         <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />

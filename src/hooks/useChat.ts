@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 const WEBHOOK_URL = 'https://healthrocket.app.n8n.cloud/webhook/8ec404be-7f51-47c8-8faf-0d139bd4c5e9/chat';
 
 export const useChat = () => {
-  const { logChatMessage, currentMessages, currentConversationId, loading: chatsLoading } = useChats();
+  const { logChatMessage, currentMessages, currentConversationId, loading: chatsLoading, loadConversation } = useChats();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
@@ -22,8 +22,11 @@ export const useChat = () => {
 
   // Convert database messages to UI messages
   useEffect(() => {
-    // Don't update messages while chats are loading to prevent flicker
-    if (chatsLoading) return;
+    console.log('useChat: currentMessages changed', { 
+      currentMessagesLength: currentMessages.length, 
+      currentConversationId, 
+      chatsLoading 
+    });
     
     if (currentMessages.length > 0) {
       const uiMessages: Message[] = [];
@@ -46,10 +49,11 @@ export const useChat = () => {
         });
       });
       
+      console.log('useChat: Setting messages from database', { uiMessagesLength: uiMessages.length });
       setMessages([
         {
           id: 'welcome',
-          text: "Welcome back! Continue your conversation or ask me something new.",
+          text: "Welcome back! Here's your conversation history.",
           isUser: false,
           timestamp: new Date(),
           isCentered: true
@@ -58,6 +62,7 @@ export const useChat = () => {
       ]);
     } else {
       // Reset to welcome message for new conversations
+      console.log('useChat: Resetting to welcome message');
       setMessages([
         {
           id: 'welcome',
@@ -68,7 +73,7 @@ export const useChat = () => {
         }
       ]);
     }
-  }, [currentMessages, chatsLoading]);
+  }, [currentMessages, currentConversationId]);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -172,5 +177,6 @@ export const useChat = () => {
     messagesEndRef,
     setMessages,
     currentConversationId
+    loadConversation
   };
 };

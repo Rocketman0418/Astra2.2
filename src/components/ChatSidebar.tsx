@@ -6,14 +6,14 @@ import { useAuth } from '../contexts/AuthContext';
 interface ChatSidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  onLoadConversation: (conversationId: string) => void;
 }
 
-export const ChatSidebar: React.FC<ChatSidebarProps> = ({ isOpen, onClose }) => {
+export const ChatSidebar: React.FC<ChatSidebarProps> = ({ isOpen, onClose, onLoadConversation }) => {
   const { user, signOut } = useAuth();
   const {
     conversations,
     currentConversationId,
-    loadConversation,
     deleteConversation,
     startNewConversation,
     loading
@@ -33,7 +33,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ isOpen, onClose }) => 
   };
 
   const handleLoadConversation = (conversationId: string) => {
-    loadConversation(conversationId);
+    console.log('ChatSidebar: Loading conversation', conversationId);
+    onLoadConversation(conversationId);
     onClose();
   };
 
