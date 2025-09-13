@@ -1,6 +1,4 @@
-import React, { useEffect } from 'react';
-import { Header } from './Header';
-import { ChatSidebar } from './ChatSidebar';
+import React, { useEffect, useRef } from 'react';
 import { MessageBubble } from './MessageBubble';
 import { LoadingIndicator } from './LoadingIndicator';
 import { ChatInput } from './ChatInput';
@@ -9,9 +7,16 @@ import { VisualizationLoadingView } from './VisualizationLoadingView';
 import { useChat } from '../hooks/useChat';
 import { useVisualization } from '../hooks/useVisualization';
 
-export const ChatContainer: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
+interface ChatContainerProps {
+  sidebarOpen: boolean;
+  onCloseSidebar: () => void;
+}
 
+export const ChatContainer: React.FC<ChatContainerProps> = ({ 
+  sidebarOpen, 
+  onCloseSidebar 
+}) => {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const {
     messages,
     isLoading,
@@ -19,7 +24,6 @@ export const ChatContainer: React.FC = () => {
     setInputValue,
     sendMessage,
     toggleMessageExpansion,
-    messagesEndRef,
     loadConversation,
     startNewConversation,
     currentConversationId,
@@ -100,44 +104,33 @@ export const ChatContainer: React.FC = () => {
     }
   }
   return (
-    <div className="flex flex-col h-screen bg-gray-900">
-      <ChatSidebar 
-        isOpen={sidebarOpen} 
-        onClose={() => setSidebarOpen(false)}
-        onLoadConversation={loadConversation}
-        onStartNewConversation={startNewConversation}
-      />
-      
-      <div className={`flex flex-col h-screen transition-all duration-300 ${sidebarOpen ? 'lg:ml-80' : ''}`}>
-        <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-      
-        <div className="flex-1 overflow-y-auto pt-16 pb-20 md:pb-24 px-3 md:px-4">
-          <div className="max-w-4xl mx-auto space-y-3 md:space-y-4">
-            {messages.map((message) => (
-              <div key={message.id} id={`message-${message.id}`}>
-                <MessageBubble
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto pb-20 md:pb-24 px-3 md:px-4">
+        <div className="max-w-4xl mx-auto space-y-3 md:space-y-4 pt-4">
+          {messages.map((message) => (
+            <div key={message.id} id={`message-${message.id}`}>
+              <MessageBubble
                 message={message}
                 onToggleExpansion={toggleMessageExpansion}
                 onCreateVisualization={generateVisualization}
                 onViewVisualization={showVisualization}
                 visualizationState={getVisualization(message.id)}
-                />
-              </div>
-            ))}
-          
-            {isLoading && <LoadingIndicator />}
-          
-            <div ref={messagesEndRef} />
-          </div>
+              />
+            </div>
+          ))}
+        
+          {isLoading && <LoadingIndicator />}
+        
+          <div ref={messagesEndRef} />
         </div>
-
-        <ChatInput
-          value={inputValue}
-          onChange={setInputValue}
-          onSend={sendMessage}
-          disabled={isLoading}
-        />
       </div>
+
+      <ChatInput
+        value={inputValue}
+        onChange={setInputValue}
+        onSend={sendMessage}
+        disabled={isLoading}
+      />
     </div>
   );
 };

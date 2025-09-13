@@ -59,6 +59,47 @@ export type Database = {
           updated_at?: string;
         };
       };
+      group_messages: {
+        Row: {
+          id: string;
+          user_id: string;
+          user_name: string;
+          user_email: string;
+          message_content: string;
+          message_type: string;
+          mentions: any[];
+          astra_prompt: string | null;
+          visualization_data: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          user_name: string;
+          user_email: string;
+          message_content: string;
+          message_type?: string;
+          mentions?: any[];
+          astra_prompt?: string | null;
+          visualization_data?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          user_name?: string;
+          user_email?: string;
+          message_content?: string;
+          message_type?: string;
+          mentions?: any[];
+          astra_prompt?: string | null;
+          visualization_data?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
   };
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AuthScreen } from './components/auth/AuthScreen';
-import { ChatContainer } from './components/ChatContainer';
+import { MainContainer } from './components/MainContainer';
 
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
@@ -22,7 +22,7 @@ const AppContent: React.FC = () => {
     return <AuthScreen />;
   }
 
-  return <ChatContainer />;
+  return <MainContainer />;
 };
 
 function App() {
