@@ -170,8 +170,16 @@ export const useChats = () => {
   const loadConversation = useCallback(async (conversationId: string) => {
     if (!user) return;
 
+    // Don't reload if it's already the current conversation
+    if (conversationId === currentConversationId && currentMessages.length > 0) {
+      return;
+    }
     try {
       setLoading(true);
+      
+      // Clear current messages first to show loading state
+      setCurrentMessages([]);
+      setCurrentConversationId(conversationId);
       
       const { data, error } = await supabase
         .from('astra_chats')
@@ -194,18 +202,14 @@ export const useChats = () => {
       }));
 
       setCurrentMessages(messages);
-      setCurrentConversationId(conversationId);
       
-      // Force a small delay to ensure state updates properly
-      setTimeout(() => {
-        setLoading(false);
-      }, 100);
+      setLoading(false);
     } catch (err) {
       console.error('Error in loadConversation:', err);
       setError('Failed to load conversation');
       setLoading(false);
     }
-  }, [user]);
+  }, [user, currentConversationId, currentMessages.length]);
 
   // Delete a conversation
   const deleteConversation = useCallback(async (conversationId: string) => {
@@ -237,6 +241,12 @@ export const useChats = () => {
     }
   }, [user, currentConversationId, createNewConversation, fetchConversations]);
 
+  // Create a new conversation and clear current messages
+  const startNewConversation = useCallback(() => {
+    const newConversationId = createNewConversation();
+    setCurrentMessages([]);
+    return newConversationId;
+  }, [createNewConversation]);
   // Initialize conversations when user logs in
   useEffect(() => {
     if (user) {
@@ -258,6 +268,7 @@ export const useChats = () => {
     loadConversation,
     deleteConversation,
     createNewConversation,
+    startNewConversation,
     setError,
   };
 };

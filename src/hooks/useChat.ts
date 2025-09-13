@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 const WEBHOOK_URL = 'https://healthrocket.app.n8n.cloud/webhook/8ec404be-7f51-47c8-8faf-0d139bd4c5e9/chat';
 
 export const useChat = () => {
-  const { logChatMessage, currentMessages, currentConversationId } = useChats();
+  const { logChatMessage, currentMessages, currentConversationId, loading: chatsLoading } = useChats();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
@@ -22,6 +22,9 @@ export const useChat = () => {
 
   // Convert database messages to UI messages
   useEffect(() => {
+    // Don't update messages while chats are loading to prevent flicker
+    if (chatsLoading) return;
+    
     if (currentMessages.length > 0) {
       const uiMessages: Message[] = [];
       
@@ -46,7 +49,7 @@ export const useChat = () => {
       setMessages([
         {
           id: 'welcome',
-          text: "Welcome back! What can I help you with today?",
+          text: "Welcome back! Continue your conversation or ask me something new.",
           isUser: false,
           timestamp: new Date(),
           isCentered: true
@@ -65,7 +68,7 @@ export const useChat = () => {
         }
       ]);
     }
-  }, [currentMessages]);
+  }, [currentMessages, chatsLoading]);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -15,7 +15,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ isOpen, onClose }) => 
     currentConversationId,
     loadConversation,
     deleteConversation,
-    createNewConversation,
+    startNewConversation,
     loading
   } = useChats();
   
@@ -28,7 +28,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ isOpen, onClose }) => 
   );
 
   const handleNewChat = () => {
-    createNewConversation();
+    startNewConversation();
     onClose();
   };
 
