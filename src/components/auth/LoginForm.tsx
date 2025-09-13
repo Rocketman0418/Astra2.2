@@ -2,11 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
-interface LoginFormProps {
-  onSwitchToSignup: () => void;
-}
-
-export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignup }) => {
+export const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -107,14 +103,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignup }) => {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-gray-400">
-            Don't have an account?{' '}
-            <button
-              onClick={onSwitchToSignup}
-              className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
-            >
-              Sign up
-            </button>
+          <p className="text-gray-400 text-sm">
+            Access is restricted to authorized users only.
           </p>
         </div>
       </div>
