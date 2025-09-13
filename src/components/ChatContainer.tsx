@@ -33,7 +33,7 @@ export const ChatContainer: React.FC = () => {
     isGenerating,
     scrollToMessageId,
     clearScrollToMessage
-  } = useVisualization();
+  } = useVisualization(updateVisualizationStatus);
   // Register service worker for PWA
   useEffect(() => {
     // Initial scroll to bottom on component mount

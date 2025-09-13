@@ -76,7 +76,8 @@ export const useChats = () => {
     tokensUsed?: any,
     modelUsed?: string,
     toolsUsed?: string[],
-    metadata?: any
+    metadata?: any,
+    visualization?: boolean
   ): Promise<string | null> => {
     if (!user) return null;
 
@@ -100,7 +101,8 @@ export const useChats = () => {
         tokens_used: tokensUsed || {},
         model_used: modelUsed || 'n8n-workflow',
         tools_used: toolsUsed || [],
-        metadata: metadata || {}
+        metadata: metadata || {},
+        visualization: visualization || false
       };
 
       const { data, error } = await supabase
@@ -129,7 +131,7 @@ export const useChats = () => {
       // Refresh conversations list
       await fetchConversations();
 
-      return chatConversationId;
+      return data.id; // Return the actual chat message ID for visualization tracking
     } catch (err) {
       console.error('Error in logChatMessage:', err);
       setError('Failed to save chat message');
@@ -293,6 +295,28 @@ export const useChats = () => {
     setCurrentMessages([]);
     return newConversationId;
   }, []);
+  // Update visualization status for a chat message
+  const updateVisualizationStatus = useCallback(async (messageId: string, hasVisualization: boolean) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('astra_chats')
+        .update({ visualization: hasVisualization })
+        .eq('id', messageId)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error updating visualization status:', error);
+        return;
+      }
+
+      console.log('✅ Updated visualization status for message:', messageId, hasVisualization);
+    } catch (err) {
+      console.error('Error in updateVisualizationStatus:', err);
+    }
+  }, [user]);
+
   // Initialize conversations when user logs in
   useEffect(() => {
     if (user) {
@@ -315,6 +339,7 @@ export const useChats = () => {
     deleteConversation,
     createNewConversation,
     startNewConversation,
+    updateVisualizationStatus,
     setError,
   };
 };

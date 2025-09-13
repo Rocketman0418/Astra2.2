@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { VisualizationState } from '../types';
 
-export const useVisualization = () => {
+export const useVisualization = (updateVisualizationStatus?: (messageId: string, hasVisualization: boolean) => void) => {
   const [visualizations, setVisualizations] = useState<Record<string, VisualizationState>>({});
   const [currentVisualization, setCurrentVisualization] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -113,6 +113,13 @@ Return only the HTML code - no other text or formatting.`;
 
       // Automatically show the visualization after generation
       setCurrentVisualization(messageId);
+      
+      // Update the database to mark this message as having a visualization
+      if (updateVisualizationStatus) {
+        // Extract the chat ID from the message ID (format: chatId-astra)
+        const chatId = messageId.replace('-astra', '');
+        updateVisualizationStatus(chatId, true);
+      }
     } catch (error) {
       console.error('❌ Error generating visualization:', error);
       

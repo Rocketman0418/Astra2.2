@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 const WEBHOOK_URL = 'https://healthrocket.app.n8n.cloud/webhook/8ec404be-7f51-47c8-8faf-0d139bd4c5e9/chat';
 
 export const useChat = () => {
-  const { logChatMessage, currentMessages, currentConversationId, loading: chatsLoading, loadConversation, startNewConversation: chatsStartNewConversation } = useChats();
+  const { logChatMessage, currentMessages, currentConversationId, loading: chatsLoading, loadConversation, startNewConversation: chatsStartNewConversation, updateVisualizationStatus } = useChats();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
@@ -160,7 +160,7 @@ export const useChat = () => {
 
       // Log the chat message to database
       try {
-        await logChatMessage(
+        const chatId = await logChatMessage(
           text.trim(), 
           messageText, 
           currentConversationId || undefined,
@@ -175,6 +175,11 @@ export const useChat = () => {
             total_processing_time: responseTimeMs
           }
         );
+        
+        // Store the chat ID in the message for later visualization tracking
+        if (chatId) {
+          astraMessage.chatId = chatId;
+        }
       } catch (error) {
         console.error('Failed to log chat message:', error);
         // Don't block the UI if logging fails
@@ -191,7 +196,7 @@ export const useChat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, logChatMessage, currentConversationId]);
+  }, [isLoading, logChatMessage, currentConversationId, updateVisualizationStatus]);
 
   const toggleMessageExpansion = useCallback((messageId: string) => {
     setMessages(prev => 
@@ -220,6 +225,7 @@ export const useChat = () => {
     messagesEndRef,
     setMessages,
     currentConversationId,
+    updateVisualizationStatus,
     loadConversation,
     startNewConversation
   };

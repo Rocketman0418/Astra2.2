@@ -1,5 +1,6 @@
 export interface Message {
   id: string;
+  chatId?: string;
   text: string;
   isUser: boolean;
   timestamp: Date;

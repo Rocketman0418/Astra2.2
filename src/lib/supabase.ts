@@ -28,6 +28,7 @@ export type Database = {
           response: string;
           conversation_id: string | null;
           session_id: string | null;
+          visualization: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -40,6 +41,7 @@ export type Database = {
           response: string;
           conversation_id?: string | null;
           session_id?: string | null;
+          visualization?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -52,6 +54,7 @@ export type Database = {
           response?: string;
           conversation_id?: string | null;
           session_id?: string | null;
+          visualization?: boolean;
           created_at?: string;
           updated_at?: string;
         };
