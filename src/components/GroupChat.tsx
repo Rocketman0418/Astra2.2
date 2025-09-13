@@ -44,6 +44,7 @@ export const GroupChat: React.FC = () => {
     showVisualization,
     hideVisualization,
     currentVisualization,
+    getVisualization,
   } = useVisualization();
 
   // Fetch users for mentions
