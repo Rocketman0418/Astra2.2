@@ -43,6 +43,7 @@ export const GroupChat: React.FC = () => {
     generateVisualization,
     showVisualization,
     hideVisualization,
+    getVisualization,
     currentVisualization,
     isGenerating,
   } = useVisualization();
@@ -161,7 +162,6 @@ export const GroupChat: React.FC = () => {
     
     // Check visualization hook state
     return getVisualization(messageId);
-    showVisualization(messageId);
   };
 
   // Filter messages based on search

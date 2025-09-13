@@ -123,11 +123,23 @@ export const GroupMessage: React.FC<GroupMessageProps> = ({
   message,
   currentUserId,
   onViewVisualization,
-  onCreateVisualization
+  onCreateVisualization,
+  visualizationState
 }) => {
   const isOwnMessage = message.user_id === currentUserId;
   const isAstraMessage = message.message_type === 'astra';
   const hasVisualization = message.visualization_data;
+  const isGeneratingVisualization = visualizationState?.isGenerating || false;
+
+  const getButtonText = () => {
+    if (isGeneratingVisualization) {
+      return 'Generating...';
+    }
+    if (hasVisualization || visualizationState?.content) {
+      return 'View Visualization';
+    }
+    return 'Create Visualization';
+  };
 
   const handleVisualizationClick = () => {
     if (hasVisualization && onViewVisualization) {
