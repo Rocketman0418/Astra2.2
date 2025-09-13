@@ -7,6 +7,7 @@ interface GroupMessageProps {
   currentUserId: string;
   onViewVisualization?: (messageId: string, visualizationData: string) => void;
   onCreateVisualization?: (messageId: string, messageContent: string) => void;
+  visualizationState?: any;
 }
 
 const formatMessageContent = (content: string, mentions: string[], isAstraMessage: boolean = false): JSX.Element => {
@@ -193,10 +194,11 @@ export const GroupMessage: React.FC<GroupMessageProps> = ({
             <div className="mt-3">
               <button
                 onClick={handleVisualizationClick}
-                className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 transform hover:scale-105"
+                disabled={isGeneratingVisualization}
+                className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
               >
-                <BarChart3 className="w-4 h-4" />
-                <span>{hasVisualization ? 'View Visualization' : 'Create Visualization'}</span>
+                <BarChart3 className={`w-4 h-4 ${isGeneratingVisualization ? 'animate-pulse' : ''}`} />
+                <span>{getButtonText()}</span>
               </button>
             </div>
           )}

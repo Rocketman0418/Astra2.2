@@ -29,6 +29,7 @@ export const GroupChat: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
+  const [visualizationStates, setVisualizationStates] = useState<Record<string, any>>({});
 
   const {
     messages,
@@ -85,8 +86,18 @@ export const GroupChat: React.FC = () => {
 
   // Auto-scroll to bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Always scroll to bottom when messages change or Astra is thinking
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   }, [messages, isAstraThinking]);
+
+  // Also scroll to bottom when component mounts
+  useEffect(() => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+    }, 200);
+  }, []);
 
   // Handle sending messages
   const handleSendMessage = async (message: string) => {
@@ -98,14 +109,58 @@ export const GroupChat: React.FC = () => {
 
   // Handle visualization creation
   const handleCreateVisualization = async (messageId: string, messageContent: string) => {
+    // Set generating state
+    setVisualizationStates(prev => ({
+      ...prev,
+      [messageId]: { isGenerating: true, content: null }
+    }));
+
     await generateVisualization(messageId, messageContent);
     
-    // After generating, update the database with visualization data
-    // This will be handled by the visualization hook
+    // Update state after generation
+    const visualization = getVisualization(messageId);
+    if (visualization?.content) {
+      setVisualizationStates(prev => ({
+        ...prev,
+        [messageId]: { isGenerating: false, content: visualization.content }
+      }));
+      
+      // Update the database with visualization data
+      await updateVisualizationData(messageId, visualization.content);
+    }
   };
 
   // Handle viewing visualization
   const handleViewVisualization = (messageId: string, visualizationData: string) => {
+    // If we have stored visualization data, use that
+    if (visualizationData) {
+      showVisualization(messageId);
+      return;
+    }
+    
+    // Otherwise check our local state
+    const localViz = visualizationStates[messageId];
+    if (localViz?.content) {
+      showVisualization(messageId);
+    }
+  };
+
+  // Get visualization state for a message
+  const getVisualizationState = (messageId: string) => {
+    // Check database first
+    const message = messages.find(m => m.id === messageId);
+    if (message?.visualization_data) {
+      return { isGenerating: false, content: message.visualization_data };
+    }
+    
+    // Then check local state
+    const localState = visualizationStates[messageId];
+    if (localState) {
+      return localState;
+    }
+    
+    // Check visualization hook state
+    return getVisualization(messageId);
     showVisualization(messageId);
   };
 
@@ -268,6 +323,7 @@ export const GroupChat: React.FC = () => {
                 currentUserId={user?.id || ''}
                 onViewVisualization={handleViewVisualization}
                 onCreateVisualization={handleCreateVisualization}
+                visualizationState={getVisualizationState(message.id)}
               />
             ))}
 

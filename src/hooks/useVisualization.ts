@@ -114,12 +114,7 @@ Return only the HTML code - no other text or formatting.`;
       // Automatically show the visualization after generation
       setCurrentVisualization(messageId);
       
-      // Update the database to mark this message as having a visualization
-      if (updateVisualizationStatus) {
-        // Extract the chat ID from the message ID (format: chatId-astra)
-        const chatId = messageId.replace('-astra', '');
-        updateVisualizationStatus(chatId, true);
-      }
+      // Note: Database update will be handled by the calling component
     } catch (error) {
       console.error('❌ Error generating visualization:', error);
       
