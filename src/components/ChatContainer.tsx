@@ -3,7 +3,6 @@ import { MessageBubble } from './MessageBubble';
 import { LoadingIndicator } from './LoadingIndicator';
 import { ChatInput } from './ChatInput';
 import { VisualizationView } from './VisualizationView';
-import { VisualizationLoadingView } from './VisualizationLoadingView';
 import { useChat } from '../hooks/useChat';
 import { useVisualization } from '../hooks/useVisualization';
 
@@ -44,7 +43,6 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
     hideVisualization,
     getVisualization,
     currentVisualization,
-    isGenerating,
     scrollToMessageId,
     clearScrollToMessage
   } = useVisualization(updateVisualizationStatus);
@@ -110,11 +108,6 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [messagesEndRef, messages, scrollToMessageId, clearScrollToMessage]);
-
-  // Show loading view when generating visualization
-  if (isGenerating) {
-    return <VisualizationLoadingView />;
-  }
 
   // Show visualization view if one is currently active
   if (currentVisualization) {

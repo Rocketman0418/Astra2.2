@@ -109,13 +109,53 @@ export const GroupChat: React.FC = () => {
 
   // Handle visualization creation
   const handleCreateVisualization = async (messageId: string, messageContent: string) => {
-    // Set generating state
+    console.log('🎯 Starting visualization generation for message:', messageId);
+    
+    // Set generating state immediately
     setVisualizationStates(prev => ({
       ...prev,
       [messageId]: { isGenerating: true, content: null }
     }));
 
-    await generateVisualization(messageId, messageContent);
+    try {
+      await generateVisualization(messageId, messageContent);
+      
+      console.log('✅ Visualization generation completed for message:', messageId);
+      
+      // Get the generated visualization
+      const visualization = getVisualization(messageId);
+      console.log('📊 Retrieved visualization:', visualization);
+      
+      if (visualization?.content) {
+        console.log('💾 Updating local state and database for message:', messageId);
+        
+        // Update local state
+        setVisualizationStates(prev => ({
+          ...prev,
+          [messageId]: { isGenerating: false, content: visualization.content }
+        }));
+        
+        // Update the database with visualization data
+        await updateVisualizationData(messageId, visualization.content);
+        
+        console.log('✅ Successfully updated visualization state for message:', messageId);
+      } else {
+        console.log('❌ No visualization content found for message:', messageId);
+        // Set error state
+        setVisualizationStates(prev => ({
+          ...prev,
+          [messageId]: { isGenerating: false, content: null }
+        }));
+      }
+    } catch (error) {
+      console.error('❌ Error during visualization generation:', error);
+      // Set error state
+      setVisualizationStates(prev => ({
+        ...prev,
+        [messageId]: { isGenerating: false, content: null }
+      }));
+    }
+  };
     
     // Update state after generation
     const visualization = getVisualization(messageId);
@@ -147,20 +187,29 @@ export const GroupChat: React.FC = () => {
 
   // Get visualization state for a message
   const getVisualizationState = (messageId: string) => {
-    // Check database first
-    const message = messages.find(m => m.id === messageId);
-    if (message?.visualization_data) {
-      return { isGenerating: false, content: message.visualization_data };
-    }
-    
-    // Then check local state
+    // First check local state (most up-to-date)
     const localState = visualizationStates[messageId];
     if (localState) {
+      console.log('📊 Using local visualization state for message:', messageId, localState);
       return localState;
     }
     
+    // Check database first
+    const message = messages.find(m => m.id === messageId);
+    if (message?.visualization_data) {
+      console.log('📊 Using database visualization state for message:', messageId);
+      return { isGenerating: false, content: message.visualization_data };
+    }
+    
     // Check visualization hook state
-    return getVisualization(messageId);
+    const hookState = getVisualization(messageId);
+    if (hookState) {
+      console.log('📊 Using hook visualization state for message:', messageId, hookState);
+      return hookState;
+    }
+    
+    console.log('📊 No visualization state found for message:', messageId);
+    return null;
   };
 
   // Filter messages based on search
