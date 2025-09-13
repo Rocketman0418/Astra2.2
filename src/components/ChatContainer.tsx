@@ -22,7 +22,8 @@ export const ChatContainer: React.FC = () => {
     messagesEndRef,
     loadConversation,
     startNewConversation
-  } = useChat();
+    currentConversationId,
+    updateVisualizationStatus
 
   const {
     generateVisualization,
