@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Search, Users, X } from 'lucide-react';
 import { GroupMessage } from './GroupMessage';
 import { MentionInput } from './MentionInput';
@@ -108,7 +108,7 @@ export const GroupChat: React.FC = () => {
   };
 
   // Handle visualization creation
-  const handleCreateVisualization = async (messageId: string, messageContent: string) => {
+  const handleCreateVisualization = useCallback(async (messageId: string, messageContent: string) => {
     console.log('🎯 Starting visualization generation for message:', messageId);
     
     // Set generating state immediately
@@ -155,6 +155,7 @@ export const GroupChat: React.FC = () => {
         [messageId]: { isGenerating: false, content: null }
       }));
     }
+  }, [generateVisualization, getVisualization, updateVisualizationData]);
     
     // Update state after generation
     const visualization = getVisualization(messageId);
@@ -186,20 +187,29 @@ export const GroupChat: React.FC = () => {
 
   // Get visualization state for a message
   const getVisualizationState = (messageId: string) => {
-    // Check database first
-    const message = messages.find(m => m.id === messageId);
-    if (message?.visualization_data) {
-      return { isGenerating: false, content: message.visualization_data };
-    }
-    
-    // Then check local state
+    // First check local state (most up-to-date)
     const localState = visualizationStates[messageId];
     if (localState) {
+      console.log('📊 Using local visualization state for message:', messageId, localState);
       return localState;
     }
     
+    // Check database first
+    const message = messages.find(m => m.id === messageId);
+    if (message?.visualization_data) {
+      console.log('📊 Using database visualization state for message:', messageId);
+      return { isGenerating: false, content: message.visualization_data };
+    }
+    
     // Check visualization hook state
-    return getVisualization(messageId);
+    const hookState = getVisualization(messageId);
+    if (hookState) {
+      console.log('📊 Using hook visualization state for message:', messageId, hookState);
+      return hookState;
+    }
+    
+    console.log('📊 No visualization state found for message:', messageId);
+    return null;
   };
 
   // Filter messages based on search
