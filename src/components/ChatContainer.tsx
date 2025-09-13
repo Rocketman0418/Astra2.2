@@ -34,14 +34,16 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
     loadConversation,
     startNewConversation,
     currentConversationId,
-    updateVisualizationStatus
+    updateVisualizationStatus,
+    getVisualizationState,
+    updateVisualizationState
   } = useChat();
 
   const {
     generateVisualization,
     showVisualization,
     hideVisualization,
-    getVisualization,
+    getVisualization: getHookVisualization,
     currentVisualization,
     scrollToMessageId,
     clearScrollToMessage
@@ -64,6 +66,54 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
       onNewChatStarted();
     }
   }, [shouldStartNewChat, startNewConversation, onNewChatStarted]);
+
+  // Handle visualization creation for private chat
+  const handleCreateVisualization = useCallback(async (messageId: string, messageContent: string) => {
+    console.log('🎯 Private chat: Starting visualization generation for message:', messageId);
+    
+    // Set generating state immediately
+    updateVisualizationState(messageId, { isGenerating: true, content: null });
+
+    try {
+      await generateVisualization(messageId, messageContent);
+      
+      console.log('✅ Private chat: Visualization generation completed for message:', messageId);
+      
+      // Set completion state
+      setTimeout(() => {
+        updateVisualizationState(messageId, { 
+          isGenerating: false, 
+          content: 'generated', 
+          hasVisualization: true 
+        });
+        console.log('✅ Private chat: Updated visualization state for message:', messageId);
+      }, 100);
+      
+    } catch (error) {
+      console.error('❌ Private chat: Error during visualization generation:', error);
+      updateVisualizationState(messageId, { 
+        isGenerating: false, 
+        content: null, 
+        hasVisualization: false 
+      });
+    }
+  }, [generateVisualization, updateVisualizationState]);
+
+  // Handle viewing visualization for private chat
+  const handleViewVisualization = useCallback((messageId: string) => {
+    console.log('👁️ Private chat: Viewing visualization for message:', messageId);
+    
+    // Check hook state for visualization content
+    const hookVisualization = getHookVisualization(messageId);
+    if (hookVisualization?.content) {
+      console.log('📊 Private chat: Using hook visualization data');
+      showVisualization(messageId);
+      return;
+    }
+    
+    console.log('❌ Private chat: No visualization data found for message:', messageId);
+  }, [showVisualization, getHookVisualization]);
+
   useEffect(() => {
     // Initial scroll to bottom on component mount
     setTimeout(() => {
@@ -111,7 +161,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
 
   // Show visualization view if one is currently active
   if (currentVisualization) {
-    const visualization = getVisualization(currentVisualization);
+    const visualization = getHookVisualization(currentVisualization);
     if (visualization?.content) {
       return (
         <VisualizationView
@@ -121,6 +171,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
       );
     }
   }
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto pb-20 md:pb-24 px-3 md:px-4">
@@ -130,9 +181,9 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
               <MessageBubble
                 message={message}
                 onToggleExpansion={toggleMessageExpansion}
-                onCreateVisualization={generateVisualization}
-                onViewVisualization={showVisualization}
-                visualizationState={getVisualization(message.id)}
+                onCreateVisualization={handleCreateVisualization}
+                onViewVisualization={handleViewVisualization}
+                visualizationState={getVisualizationState(message.id)}
               />
             </div>
           ))}

@@ -86,11 +86,11 @@ export const GroupChat: React.FC = () => {
 
   // Auto-scroll to bottom
   useEffect(() => {
-    // Always scroll to bottom when messages change or Astra is thinking
+    // Always scroll to bottom when messages change, Astra is thinking, or visualization states change
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
-  }, [messages, isAstraThinking]);
+  }, [messages, isAstraThinking, visualizationStates]);
 
   // Also scroll to bottom when component mounts
   useEffect(() => {

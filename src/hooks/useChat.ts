@@ -7,6 +7,7 @@ const WEBHOOK_URL = 'https://healthrocket.app.n8n.cloud/webhook/8ec404be-7f51-47
 
 export const useChat = () => {
   const { logChatMessage, currentMessages, currentConversationId, loading: chatsLoading, loadConversation, startNewConversation: chatsStartNewConversation, updateVisualizationStatus } = useChats();
+  const [visualizationStates, setVisualizationStates] = useState<Record<string, any>>({});
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
@@ -215,6 +216,19 @@ export const useChat = () => {
     return newConversationId;
   }, [chatsStartNewConversation]);
 
+  // Get visualization state for a message
+  const getVisualizationState = useCallback((messageId: string) => {
+    return visualizationStates[messageId] || null;
+  }, [visualizationStates]);
+
+  // Update visualization state
+  const updateVisualizationState = useCallback((messageId: string, state: any) => {
+    setVisualizationStates(prev => ({
+      ...prev,
+      [messageId]: state
+    }));
+  }, []);
+
   return {
     messages,
     isLoading,
@@ -227,6 +241,8 @@ export const useChat = () => {
     currentConversationId,
     updateVisualizationStatus,
     loadConversation,
-    startNewConversation
+    startNewConversation,
+    getVisualizationState,
+    updateVisualizationState
   };
 };
