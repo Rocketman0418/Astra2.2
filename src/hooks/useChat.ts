@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Message } from '../types';
 import { useChats } from './useChats';
+import { v4 as uuidv4 } from 'uuid';
 
 const WEBHOOK_URL = 'https://healthrocket.app.n8n.cloud/webhook/8ec404be-7f51-47c8-8faf-0d139bd4c5e9/chat';
 
@@ -77,13 +78,15 @@ export const useChat = () => {
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
 
+    const messageId = uuidv4();
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: `${messageId}-user`,
       text: text.trim(),
       isUser: true,
       timestamp: new Date()
     };
 
+    // Add user message to UI immediately
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
@@ -116,12 +119,13 @@ export const useChat = () => {
       }
 
       const astraMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: `${messageId}-astra`,
         text: messageText,
         isUser: false,
         timestamp: new Date()
       };
 
+      // Add Astra response to UI immediately
       setMessages(prev => [...prev, astraMessage]);
 
       // Log the chat message to database
@@ -134,7 +138,7 @@ export const useChat = () => {
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: `${messageId}-error`,
         text: "I'm sorry, I'm having trouble connecting right now. Please try again in a moment.",
         isUser: false,
         timestamp: new Date()
@@ -143,7 +147,7 @@ export const useChat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading]);
+  }, [isLoading, logChatMessage, currentConversationId]);
 
   const toggleMessageExpansion = useCallback((messageId: string) => {
     setMessages(prev => 
