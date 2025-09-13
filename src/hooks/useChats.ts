@@ -195,10 +195,14 @@ export const useChats = () => {
 
       setCurrentMessages(messages);
       setCurrentConversationId(conversationId);
+      
+      // Force a small delay to ensure state updates properly
+      setTimeout(() => {
+        setLoading(false);
+      }, 100);
     } catch (err) {
       console.error('Error in loadConversation:', err);
       setError('Failed to load conversation');
-    } finally {
       setLoading(false);
     }
   }, [user]);
