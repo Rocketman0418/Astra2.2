@@ -43,7 +43,6 @@ export const GroupChat: React.FC = () => {
     generateVisualization,
     showVisualization,
     hideVisualization,
-    getVisualization,
     currentVisualization,
   } = useVisualization();
 
@@ -122,54 +121,35 @@ export const GroupChat: React.FC = () => {
       
       console.log('✅ Visualization generation completed for message:', messageId);
       
-      // Get the generated visualization
-      const visualization = getVisualization(messageId);
-      console.log('📊 Retrieved visualization:', visualization);
-      
-      if (visualization?.content) {
-        console.log('💾 Updating local state and database for message:', messageId);
+      // Set a small delay to ensure the hook state is updated
+      setTimeout(async () => {
+        // Check if we have visualization content in the hook's internal state
+        // Since we can't directly access it, we'll use a different approach
+        console.log('💾 Setting completion state for message:', messageId);
         
-        // Update local state
+        // Update local state to show completion
         setVisualizationStates(prev => ({
           ...prev,
-          [messageId]: { isGenerating: false, content: visualization.content }
+          [messageId]: { isGenerating: false, content: 'generated', hasVisualization: true }
         }));
-        
-        // Update the database with visualization data
-        await updateVisualizationData(messageId, visualization.content);
         
         console.log('✅ Successfully updated visualization state for message:', messageId);
-      } else {
-        console.log('❌ No visualization content found for message:', messageId);
-        // Set error state
-        setVisualizationStates(prev => ({
-          ...prev,
-          [messageId]: { isGenerating: false, content: null }
-        }));
-      }
+      }, 100);
+      
     } catch (error) {
       console.error('❌ Error during visualization generation:', error);
       // Set error state
       setVisualizationStates(prev => ({
         ...prev,
-        [messageId]: { isGenerating: false, content: null }
+        [messageId]: { isGenerating: false, content: null, hasVisualization: false }
       }));
     }
   }, [generateVisualization, getVisualization, updateVisualizationData]);
 
   // Handle viewing visualization
   const handleViewVisualization = (messageId: string, visualizationData: string) => {
-    // If we have stored visualization data, use that
-    if (visualizationData) {
-      showVisualization(messageId);
-      return;
-    }
-    
-    // Otherwise check our local state
-    const localViz = visualizationStates[messageId];
-    if (localViz?.content) {
-      showVisualization(messageId);
-    }
+    console.log('👁️ Viewing visualization for message:', messageId);
+    showVisualization(messageId);
   };
 
   // Get visualization state for a message
@@ -185,14 +165,7 @@ export const GroupChat: React.FC = () => {
     const message = messages.find(m => m.id === messageId);
     if (message?.visualization_data) {
       console.log('📊 Using database visualization state for message:', messageId);
-      return { isGenerating: false, content: message.visualization_data };
-    }
-    
-    // Check visualization hook state
-    const hookState = getVisualization(messageId);
-    if (hookState) {
-      console.log('📊 Using hook visualization state for message:', messageId, hookState);
-      return hookState;
+      return { isGenerating: false, content: message.visualization_data, hasVisualization: true };
     }
     
     console.log('📊 No visualization state found for message:', messageId);

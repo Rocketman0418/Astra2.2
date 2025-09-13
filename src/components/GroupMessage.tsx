@@ -135,7 +135,7 @@ export const GroupMessage: React.FC<GroupMessageProps> = ({
     if (isGeneratingVisualization) {
       return 'Generating...';
     }
-    if (hasVisualization || visualizationState?.content) {
+    if (hasVisualization || visualizationState?.hasVisualization) {
       return 'View Visualization';
     }
     return 'Create Visualization';
@@ -148,6 +148,8 @@ export const GroupMessage: React.FC<GroupMessageProps> = ({
     
     if (hasVisualization && onViewVisualization) {
       onViewVisualization(message.id, message.visualization_data!);
+    } else if (visualizationState?.hasVisualization && onViewVisualization) {
+      onViewVisualization(message.id, '');
     } else if (isAstraMessage && onCreateVisualization) {
       onCreateVisualization(message.id, message.message_content);
     }
