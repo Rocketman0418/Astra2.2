@@ -156,19 +156,6 @@ export const GroupChat: React.FC = () => {
       }));
     }
   };
-    
-    // Update state after generation
-    const visualization = getVisualization(messageId);
-    if (visualization?.content) {
-      setVisualizationStates(prev => ({
-        ...prev,
-        [messageId]: { isGenerating: false, content: visualization.content }
-      }));
-      
-      // Update the database with visualization data
-      await updateVisualizationData(messageId, visualization.content);
-    }
-  };
 
   // Handle viewing visualization
   const handleViewVisualization = (messageId: string, visualizationData: string) => {
