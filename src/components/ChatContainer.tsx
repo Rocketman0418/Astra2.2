@@ -29,6 +29,11 @@ export const ChatContainer: React.FC = () => {
   } = useVisualization();
   // Register service worker for PWA
   useEffect(() => {
+    // Initial scroll to bottom on component mount
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+    }, 100);
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
@@ -44,6 +49,9 @@ export const ChatContainer: React.FC = () => {
 
   // Handle viewport adjustments for mobile keyboards
   useEffect(() => {
+    // Scroll to bottom immediately when messages change
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    
     const handleResize = () => {
       // Force scroll to bottom when keyboard appears/disappears
       setTimeout(() => {
@@ -53,7 +61,7 @@ export const ChatContainer: React.FC = () => {
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [messagesEndRef]);
+  }, [messagesEndRef, messages]);
 
   // Show loading view when generating visualization
   if (isGenerating) {
