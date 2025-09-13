@@ -10,11 +10,19 @@ import { useVisualization } from '../hooks/useVisualization';
 interface ChatContainerProps {
   sidebarOpen: boolean;
   onCloseSidebar: () => void;
+  conversationToLoad: string | null;
+  shouldStartNewChat: boolean;
+  onConversationLoaded: () => void;
+  onNewChatStarted: () => void;
 }
 
 export const ChatContainer: React.FC<ChatContainerProps> = ({ 
   sidebarOpen, 
-  onCloseSidebar 
+  onCloseSidebar,
+  conversationToLoad,
+  shouldStartNewChat,
+  onConversationLoaded,
+  onNewChatStarted
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const {
@@ -41,6 +49,23 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
     clearScrollToMessage
   } = useVisualization(updateVisualizationStatus);
   // Register service worker for PWA
+  // Handle conversation loading from sidebar
+  useEffect(() => {
+    if (conversationToLoad) {
+      console.log('ChatContainer: Loading conversation from sidebar:', conversationToLoad);
+      loadConversation(conversationToLoad);
+      onConversationLoaded();
+    }
+  }, [conversationToLoad, loadConversation, onConversationLoaded]);
+
+  // Handle new chat from sidebar
+  useEffect(() => {
+    if (shouldStartNewChat) {
+      console.log('ChatContainer: Starting new chat from sidebar');
+      startNewConversation();
+      onNewChatStarted();
+    }
+  }, [shouldStartNewChat, startNewConversation, onNewChatStarted]);
   useEffect(() => {
     // Initial scroll to bottom on component mount
     setTimeout(() => {

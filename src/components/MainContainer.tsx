@@ -9,7 +9,18 @@ import { ChatMode } from '../types';
 export const MainContainer: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatMode, setChatMode] = useState<ChatMode>('private');
+  const [conversationToLoad, setConversationToLoad] = useState<string | null>(null);
+  const [shouldStartNewChat, setShouldStartNewChat] = useState(false);
 
+  const handleLoadConversation = (conversationId: string) => {
+    setConversationToLoad(conversationId);
+    setSidebarOpen(false);
+  };
+
+  const handleStartNewConversation = () => {
+    setShouldStartNewChat(true);
+    setSidebarOpen(false);
+  };
   return (
     <div className="flex flex-col h-screen bg-gray-900">
       {/* Sidebar - only show for private chat mode */}
@@ -17,14 +28,8 @@ export const MainContainer: React.FC = () => {
         <ChatSidebar 
           isOpen={sidebarOpen} 
           onClose={() => setSidebarOpen(false)}
-          onLoadConversation={(id) => {
-            // This will be handled by ChatContainer
-            setSidebarOpen(false);
-          }}
-          onStartNewConversation={() => {
-            // This will be handled by ChatContainer
-            setSidebarOpen(false);
-          }}
+          onLoadConversation={handleLoadConversation}
+          onStartNewConversation={handleStartNewConversation}
         />
       )}
       
@@ -48,6 +53,10 @@ export const MainContainer: React.FC = () => {
             <ChatContainer 
               sidebarOpen={sidebarOpen}
               onCloseSidebar={() => setSidebarOpen(false)}
+              conversationToLoad={conversationToLoad}
+              shouldStartNewChat={shouldStartNewChat}
+              onConversationLoaded={() => setConversationToLoad(null)}
+              onNewChatStarted={() => setShouldStartNewChat(false)}
             />
           ) : (
             <GroupChat />
