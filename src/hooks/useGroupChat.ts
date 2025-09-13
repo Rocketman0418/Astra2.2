@@ -79,6 +79,9 @@ export const useGroupChat = () => {
         return;
       }
 
+      // Immediately add the message to local state for instant UI update
+      setMessages(prev => [...prev, data]);
+
       // If @astra was mentioned, get AI response
       if (isAstraMention) {
         setIsAstraThinking(true);
@@ -123,12 +126,17 @@ export const useGroupChat = () => {
             astra_prompt: astraPrompt,
           };
 
-          const { error: astraError } = await supabase
+          const { data: astraData, error: astraError } = await supabase
             .from('group_messages')
-            .insert(astraMessageData);
+            .insert(astraMessageData)
+            .select()
+            .single();
 
           if (astraError) {
             console.error('Error sending Astra response:', astraError);
+          } else if (astraData) {
+            // Immediately add Astra's response to local state
+            setMessages(prev => [...prev, astraData]);
           }
         } catch (err) {
           console.error('Error getting Astra response:', err);
@@ -144,9 +152,16 @@ export const useGroupChat = () => {
             astra_prompt: content.replace(/@astra\s*/i, '').trim(),
           };
 
-          await supabase
+          const { data: errorData } = await supabase
             .from('group_messages')
-            .insert(errorMessageData);
+            .insert(errorMessageData)
+            .select()
+            .single();
+
+          if (errorData) {
+            // Immediately add error message to local state
+            setMessages(prev => [...prev, errorData]);
+          }
         } finally {
           setIsAstraThinking(false);
         }
@@ -241,7 +256,15 @@ export const useGroupChat = () => {
         table: 'group_messages'
       }, (payload) => {
         const newMessage = payload.new as GroupMessageRow;
-        setMessages(prev => [...prev, newMessage]);
+        // Only add message if it's not already in our local state
+        // (to avoid duplicates from our own messages)
+        setMessages(prev => {
+          const messageExists = prev.some(msg => msg.id === newMessage.id);
+          if (messageExists) {
+            return prev;
+          }
+          return [...prev, newMessage];
+        });
       })
       .subscribe();
 
