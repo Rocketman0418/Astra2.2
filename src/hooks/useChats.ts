@@ -41,21 +41,39 @@ export const useChats = () => {
   const logChatMessage = useCallback(async (
     prompt: string,
     response: string,
-    conversationId?: string
+    conversationId?: string,
+    responseTimeMs?: number,
+    tokensUsed?: any,
+    modelUsed?: string,
+    toolsUsed?: string[],
+    metadata?: any
   ): Promise<string | null> => {
     if (!user) return null;
 
     try {
       const chatConversationId = conversationId || currentConversationId || createNewConversation();
       
+      // Get user name from user metadata or profile
+      const userName = user.user_metadata?.full_name || 
+                      user.user_metadata?.name || 
+                      user.identities?.[0]?.identity_data?.full_name ||
+                      user.identities?.[0]?.identity_data?.name ||
+                      user.email?.split('@')[0] || 
+                      'Unknown User';
+      
       const chatData: ChatInsert = {
         user_id: user.id,
         user_email: user.email || '',
-        user_name: user.user_metadata?.full_name || 'Unknown User',
+        user_name: userName,
         prompt,
         response,
         conversation_id: chatConversationId,
         session_id: user.id, // Using user ID as session ID for simplicity
+        response_time_ms: responseTimeMs || 0,
+        tokens_used: tokensUsed || {},
+        model_used: modelUsed || 'n8n-workflow',
+        tools_used: toolsUsed || [],
+        metadata: metadata || {}
       };
 
       const { data, error } = await supabase

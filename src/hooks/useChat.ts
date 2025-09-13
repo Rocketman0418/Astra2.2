@@ -87,6 +87,7 @@ export const useChat = () => {
     if (!text.trim() || isLoading) return;
 
     const messageId = uuidv4();
+    const startTime = Date.now();
     const userMessage: Message = {
       id: `${messageId}-user`,
       text: text.trim(),
@@ -100,6 +101,7 @@ export const useChat = () => {
     setIsLoading(true);
 
     try {
+      const requestStartTime = Date.now();
       const response = await fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: {
@@ -107,6 +109,8 @@ export const useChat = () => {
         },
         body: JSON.stringify({ chatInput: text.trim() })
       });
+      const requestEndTime = Date.now();
+      const responseTimeMs = requestEndTime - requestStartTime;
 
       if (!response.ok) {
         throw new Error('Failed to send message');
@@ -116,10 +120,28 @@ export const useChat = () => {
       
       // Try to parse JSON response and extract the output field
       let messageText = responseText;
+      let metadata: any = {};
+      let tokensUsed: any = {};
+      let toolsUsed: string[] = [];
+      
       try {
         const jsonResponse = JSON.parse(responseText);
         if (jsonResponse.output) {
           messageText = jsonResponse.output;
+        }
+        
+        // Extract additional metadata if available from n8n response
+        if (jsonResponse.metadata) {
+          metadata = jsonResponse.metadata;
+        }
+        if (jsonResponse.tokens_used) {
+          tokensUsed = jsonResponse.tokens_used;
+        }
+        if (jsonResponse.tools_used) {
+          toolsUsed = jsonResponse.tools_used;
+        }
+        if (jsonResponse.model_used) {
+          metadata.model_used = jsonResponse.model_used;
         }
       } catch (e) {
         // If it's not JSON, use the raw text
@@ -138,7 +160,21 @@ export const useChat = () => {
 
       // Log the chat message to database
       try {
-        await logChatMessage(text.trim(), messageText, currentConversationId || undefined);
+        await logChatMessage(
+          text.trim(), 
+          messageText, 
+          currentConversationId || undefined,
+          responseTimeMs,
+          tokensUsed,
+          metadata.model_used || 'n8n-workflow',
+          toolsUsed,
+          {
+            ...metadata,
+            request_time: requestStartTime,
+            response_time: requestEndTime,
+            total_processing_time: responseTimeMs
+          }
+        );
       } catch (error) {
         console.error('Failed to log chat message:', error);
         // Don't block the UI if logging fails
