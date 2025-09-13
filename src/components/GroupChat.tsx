@@ -148,10 +148,26 @@ export const GroupChat: React.FC = () => {
   }, [generateVisualization, getVisualization, updateVisualizationData]);
 
   // Handle viewing visualization
-  const handleViewVisualization = (messageId: string, visualizationData: string) => {
+  const handleViewVisualization = useCallback((messageId: string, visualizationData?: string) => {
     console.log('👁️ Viewing visualization for message:', messageId);
-    showVisualization(messageId);
-  };
+    
+    // If we have visualization data from the database, use it
+    if (visualizationData) {
+      console.log('📊 Using database visualization data');
+      showVisualization(messageId);
+      return;
+    }
+    
+    // Otherwise, check if we have it in our hook state
+    const visualization = getVisualization(messageId);
+    if (visualization?.content) {
+      console.log('📊 Using hook visualization data');
+      showVisualization(messageId);
+      return;
+    }
+    
+    console.log('❌ No visualization data found for message:', messageId);
+  }, [showVisualization, getVisualization]);
 
   // Get visualization state for a message
   const getVisualizationState = (messageId: string) => {
@@ -185,11 +201,25 @@ export const GroupChat: React.FC = () => {
 
   // Show visualization view if one is currently active
   if (currentVisualization) {
+    // First check if we have visualization data in the database
     const message = messages.find(m => m.id === currentVisualization);
     if (message?.visualization_data) {
+      console.log('📊 Showing database visualization for message:', currentVisualization);
       return (
         <VisualizationView
           content={message.visualization_data}
+          onBack={hideVisualization}
+        />
+      );
+    }
+    
+    // Otherwise check hook state
+    const visualization = getVisualization(currentVisualization);
+    if (visualization?.content) {
+      console.log('📊 Showing hook visualization for message:', currentVisualization);
+      return (
+        <VisualizationView
+          content={visualization.content}
           onBack={hideVisualization}
         />
       );
