@@ -137,12 +137,14 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
   useEffect(() => {
     // If we need to scroll to a specific message, do that instead
     if (scrollToMessageId) {
-      const messageElement = document.getElementById(`message-${scrollToMessageId}`);
-      if (messageElement) {
-        messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        clearScrollToMessage();
-        return;
-      }
+      setTimeout(() => {
+        const messageElement = document.getElementById(`message-${scrollToMessageId}`);
+        if (messageElement) {
+          messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          clearScrollToMessage();
+        }
+      }, 100);
+      return;
     }
     
     // Otherwise, scroll to bottom when messages change

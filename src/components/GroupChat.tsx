@@ -45,6 +45,8 @@ export const GroupChat: React.FC = () => {
     hideVisualization,
     currentVisualization,
     getVisualization,
+    scrollToMessageId,
+    clearScrollToMessage
   } = useVisualization();
 
   // Fetch users for mentions
@@ -86,11 +88,23 @@ export const GroupChat: React.FC = () => {
 
   // Auto-scroll to bottom
   useEffect(() => {
-    // Always scroll to bottom when messages change, Astra is thinking, or visualization states change
+    // If we need to scroll to a specific message, do that instead
+    if (scrollToMessageId) {
+      setTimeout(() => {
+        const messageElement = document.getElementById(`message-${scrollToMessageId}`);
+        if (messageElement) {
+          messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          clearScrollToMessage();
+        }
+      }, 100);
+      return;
+    }
+    
+    // Otherwise, always scroll to bottom when messages change, Astra is thinking, or visualization states change
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
-  }, [messages, isAstraThinking, visualizationStates]);
+  }, [messages, isAstraThinking, visualizationStates, scrollToMessageId, clearScrollToMessage]);
 
   // Also scroll to bottom when component mounts
   useEffect(() => {
@@ -353,14 +367,15 @@ export const GroupChat: React.FC = () => {
         ) : (
           <>
             {filteredMessages.map((message) => (
-              <GroupMessage
-                key={message.id}
-                message={message}
-                currentUserId={user?.id || ''}
-                onViewVisualization={handleViewVisualization}
-                onCreateVisualization={handleCreateVisualization}
-                visualizationState={getVisualizationState(message.id)}
-              />
+              <div key={message.id} id={`message-${message.id}`}>
+                <GroupMessage
+                  message={message}
+                  currentUserId={user?.id || ''}
+                  onViewVisualization={handleViewVisualization}
+                  onCreateVisualization={handleCreateVisualization}
+                  visualizationState={getVisualizationState(message.id)}
+                />
+              </div>
             ))}
 
             {isAstraThinking && (

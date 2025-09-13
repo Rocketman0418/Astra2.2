@@ -7,6 +7,7 @@ export const useVisualization = (updateVisualizationStatus?: (messageId: string,
   const [currentVisualization, setCurrentVisualization] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [scrollToMessageId, setScrollToMessageId] = useState<string | null>(null);
+  const [messageIdToScrollTo, setMessageIdToScrollTo] = useState<string | null>(null);
 
   const generateVisualization = useCallback(async (messageId: string, messageText: string) => {
     setIsGenerating(true);
@@ -139,6 +140,7 @@ Return only the HTML code - no other text or formatting.`;
   }, []);
 
   const showVisualization = useCallback((messageId: string) => {
+    setMessageIdToScrollTo(messageId);
     setCurrentVisualization(messageId);
     setVisualizations(prev => ({
       ...prev,
@@ -150,8 +152,12 @@ Return only the HTML code - no other text or formatting.`;
   }, []);
 
   const hideVisualization = useCallback(() => {
+    if (messageIdToScrollTo) {
+      setScrollToMessageId(messageIdToScrollTo);
+    }
     setCurrentVisualization(null);
   }, []);
+  }, [messageIdToScrollTo]);
 
   const getVisualization = useCallback((messageId: string) => {
     return visualizations[messageId] || null;
@@ -159,6 +165,7 @@ Return only the HTML code - no other text or formatting.`;
 
   const clearScrollToMessage = useCallback(() => {
     setScrollToMessageId(null);
+    setMessageIdToScrollTo(null);
   }, []);
   return {
     generateVisualization,
