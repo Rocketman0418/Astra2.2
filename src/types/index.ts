@@ -26,6 +26,7 @@ export interface GroupMessage {
   mentions: string[];
   astra_prompt?: string | null;
   visualization_data?: string | null;
+  metadata?: any;
   created_at: string;
   updated_at: string;
 }

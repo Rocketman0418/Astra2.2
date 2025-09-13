@@ -180,7 +180,7 @@ export const GroupMessage: React.FC<GroupMessageProps> = ({
             <div className="mb-3 pb-3 border-b border-gray-600/50">
               <div className="text-xs text-gray-400 mb-1">Responding to:</div>
               <div className="text-sm text-gray-300 italic">"{message.astra_prompt}"</div>
-              <div className="text-xs text-blue-300 mt-1">Asked by {message.user_name}</div>
+              <div className="text-xs text-blue-300 mt-1">Asked by {message.metadata?.asked_by_user_name || 'Unknown User'}</div>
             </div>
           )}
 

@@ -117,13 +117,15 @@ export const useGroupChat = () => {
 
           // Insert Astra's response
           const astraMessageData: GroupMessageInsert = {
-            user_id: user.id, // Using the user who triggered Astra
+            user_id: user.id,
             user_name: 'Astra',
             user_email: 'astra@rockethub.com',
             message_content: astraResponse,
             message_type: 'astra',
             mentions: [],
             astra_prompt: astraPrompt,
+            // Store the original user's name who asked the question in metadata
+            metadata: { asked_by_user_name: userName }
           };
 
           const { data: astraData, error: astraError } = await supabase
@@ -136,12 +138,7 @@ export const useGroupChat = () => {
             console.error('Error sending Astra response:', astraError);
           } else if (astraData) {
             // Immediately add Astra's response to local state
-            // Update the astra message to show who asked the question
-            const astraMessageWithUser = {
-              ...astraData,
-              user_name: userName // Store the original user's name who asked the question
-            };
-            setMessages(prev => [...prev, astraMessageWithUser]);
+            setMessages(prev => [...prev, astraData]);
           }
         } catch (err) {
           console.error('Error getting Astra response:', err);

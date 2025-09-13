@@ -70,6 +70,7 @@ export type Database = {
           mentions: any[];
           astra_prompt: string | null;
           visualization_data: string | null;
+          metadata: any;
           created_at: string;
           updated_at: string;
         };
@@ -83,6 +84,7 @@ export type Database = {
           mentions?: any[];
           astra_prompt?: string | null;
           visualization_data?: string | null;
+          metadata?: any;
           created_at?: string;
           updated_at?: string;
         };
@@ -96,6 +98,7 @@ export type Database = {
           mentions?: any[];
           astra_prompt?: string | null;
           visualization_data?: string | null;
+          metadata?: any;
           created_at?: string;
           updated_at?: string;
         };
