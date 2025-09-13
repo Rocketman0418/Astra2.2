@@ -142,6 +142,10 @@ export const GroupMessage: React.FC<GroupMessageProps> = ({
   };
 
   const handleVisualizationClick = () => {
+    if (isGeneratingVisualization) {
+      return; // Don't allow clicks while generating
+    }
+    
     if (hasVisualization && onViewVisualization) {
       onViewVisualization(message.id, message.visualization_data!);
     } else if (isAstraMessage && onCreateVisualization) {
@@ -207,10 +211,21 @@ export const GroupMessage: React.FC<GroupMessageProps> = ({
               <button
                 onClick={handleVisualizationClick}
                 disabled={isGeneratingVisualization}
-                className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
+                className={`flex items-center space-x-2 text-white px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 transform disabled:cursor-not-allowed ${
+                  isGeneratingVisualization
+                    ? 'bg-gradient-to-r from-purple-500 to-purple-600 animate-pulse cursor-not-allowed'
+                    : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:scale-105'
+                }`}
               >
-                <BarChart3 className={`w-4 h-4 ${isGeneratingVisualization ? 'animate-pulse' : ''}`} />
+                <BarChart3 className={`w-4 h-4 ${isGeneratingVisualization ? 'animate-spin' : ''}`} />
                 <span>{getButtonText()}</span>
+                {isGeneratingVisualization && (
+                  <div className="flex space-x-1 ml-1">
+                    <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                )}
               </button>
             </div>
           )}

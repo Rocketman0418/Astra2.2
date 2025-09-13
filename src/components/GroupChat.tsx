@@ -45,7 +45,6 @@ export const GroupChat: React.FC = () => {
     hideVisualization,
     getVisualization,
     currentVisualization,
-    isGenerating,
   } = useVisualization();
 
   // Fetch users for mentions
@@ -173,9 +172,6 @@ export const GroupChat: React.FC = () => {
     : messages;
 
   // Show loading view when generating visualization
-  if (isGenerating) {
-    return <VisualizationLoadingView />;
-  }
 
   // Show visualization view if one is currently active
   if (currentVisualization) {
