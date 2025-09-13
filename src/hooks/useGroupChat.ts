@@ -136,7 +136,12 @@ export const useGroupChat = () => {
             console.error('Error sending Astra response:', astraError);
           } else if (astraData) {
             // Immediately add Astra's response to local state
-            setMessages(prev => [...prev, astraData]);
+            // Update the astra message to show who asked the question
+            const astraMessageWithUser = {
+              ...astraData,
+              user_name: userName // Store the original user's name who asked the question
+            };
+            setMessages(prev => [...prev, astraMessageWithUser]);
           }
         } catch (err) {
           console.error('Error getting Astra response:', err);

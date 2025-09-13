@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
-import { Send } from 'lucide-react';
+import { Send, Smile } from 'lucide-react';
 
 interface User {
   id: string;
@@ -28,8 +28,10 @@ export const MentionInput: React.FC<MentionInputProps> = ({
   const [mentionQuery, setMentionQuery] = useState('');
   const [selectedMentionIndex, setSelectedMentionIndex] = useState(0);
   const [cursorPosition, setCursorPosition] = useState(0);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const mentionsRef = useRef<HTMLDivElement>(null);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
 
   // Add Astra to the users list
   const allUsers = [
@@ -120,8 +122,45 @@ export const MentionInput: React.FC<MentionInputProps> = ({
   const handleSubmit = () => {
     if (value.trim() && !disabled) {
       onSend(value);
+      setShowEmojiPicker(false);
     }
   };
+
+  // Common emojis for quick access
+  const commonEmojis = [
+    '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃',
+    '😉', '😊', '😇', '🥰', '😍', '🤩', '😘', '😗', '😚', '😙',
+    '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔',
+    '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥',
+    '👍', '👎', '👌', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉',
+    '👆', '🖕', '👇', '☝️', '👋', '🤚', '🖐️', '✋', '🖖', '👏',
+    '🙌', '🤲', '🤝', '🙏', '✍️', '💪', '🦾', '🦿', '🦵', '🦶',
+    '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔',
+    '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '☮️',
+    '✨', '🎉', '🎊', '🔥', '💯', '⭐', '🌟', '💫', '⚡', '💥'
+  ];
+
+  // Insert emoji at cursor position
+  const insertEmoji = (emoji: string) => {
+    const textBeforeCursor = value.substring(0, cursorPosition);
+    const textAfterCursor = value.substring(cursorPosition);
+    const newValue = textBeforeCursor + emoji + textAfterCursor;
+    const newCursorPos = cursorPosition + emoji.length;
+    
+    onChange(newValue);
+    setShowEmojiPicker(false);
+    
+    // Set cursor position after emoji
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.setSelectionRange(newCursorPos, newCursorPos);
+        textareaRef.current.focus();
+      }
+    }, 0);
+  };
+
+  // Check if @astra is mentioned (disable emojis for AI queries)
+  const hasAstraMention = value.toLowerCase().includes('@astra');
 
   // Auto-resize textarea
   useEffect(() => {
@@ -136,6 +175,9 @@ export const MentionInput: React.FC<MentionInputProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (mentionsRef.current && !mentionsRef.current.contains(event.target as Node)) {
         setShowMentions(false);
+      }
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+        setShowEmojiPicker(false);
       }
     };
 
@@ -175,9 +217,40 @@ export const MentionInput: React.FC<MentionInputProps> = ({
         </div>
       )}
 
+      {/* Emoji Picker */}
+      {showEmojiPicker && !hasAstraMention && (
+        <div
+          ref={emojiPickerRef}
+          className="absolute bottom-full left-0 right-0 mb-2 bg-gray-800 border border-gray-600 rounded-lg shadow-lg p-4 z-50 max-h-64 overflow-y-auto"
+        >
+          <div className="grid grid-cols-10 gap-2">
+            {commonEmojis.map((emoji, index) => (
+              <button
+                key={index}
+                onClick={() => insertEmoji(emoji)}
+                className="text-xl hover:bg-gray-700 rounded p-1 transition-colors"
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Input area */}
       <div className="flex items-end space-x-3">
         <div className="flex-1 relative">
+          <div className="absolute left-3 bottom-3 flex items-center space-x-1">
+            {!hasAstraMention && (
+              <button
+                type="button"
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                className="p-1 hover:bg-gray-700 rounded transition-colors"
+              >
+                <Smile className="w-4 h-4 text-gray-400" />
+              </button>
+            )}
+          </div>
           <textarea
             ref={textareaRef}
             value={value}
@@ -185,7 +258,9 @@ export const MentionInput: React.FC<MentionInputProps> = ({
             onKeyDown={handleKeyPress}
             placeholder={placeholder}
             disabled={disabled}
-            className="w-full resize-none rounded-2xl border border-gray-600 bg-gray-800 text-white px-4 py-3 pr-12 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:bg-gray-700 disabled:cursor-not-allowed max-h-32 min-h-[48px] text-sm leading-relaxed placeholder-gray-400"
+            className={`w-full resize-none rounded-2xl border border-gray-600 bg-gray-800 text-white py-3 pr-12 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:bg-gray-700 disabled:cursor-not-allowed max-h-32 min-h-[48px] text-sm leading-relaxed placeholder-gray-400 ${
+              hasAstraMention ? 'pl-4' : 'pl-10'
+            }`}
             rows={1}
             style={{ 
               scrollbarWidth: 'thin',

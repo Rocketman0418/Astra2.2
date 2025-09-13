@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Search, Users } from 'lucide-react';
+import { Search, Users, X } from 'lucide-react';
 import { GroupMessage } from './GroupMessage';
 import { MentionInput } from './MentionInput';
 import { LoadingIndicator } from './LoadingIndicator';
@@ -23,6 +23,7 @@ export const GroupChat: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [showMembers, setShowMembers] = useState(false);
 
   const {
     messages,
@@ -127,7 +128,13 @@ export const GroupChat: React.FC = () => {
             <div>
               <h2 className="text-lg font-bold text-white">Team Chat</h2>
               <p className="text-sm text-gray-400">
-                {users.length + 1} members • Use @astra for AI help
+                <button 
+                  onClick={() => setShowMembers(true)}
+                  className="hover:text-blue-300 transition-colors underline"
+                >
+                  {users.length + 1} members
+                </button>
+                {' • Use @astra for AI Intelligence'}
               </p>
             </div>
           </div>
@@ -156,6 +163,61 @@ export const GroupChat: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Members Modal */}
+      {showMembers && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-96 overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-gray-700">
+              <h3 className="text-lg font-bold text-white">Team Members</h3>
+              <button
+                onClick={() => setShowMembers(false)}
+                className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+            <div className="p-4 space-y-3 max-h-80 overflow-y-auto">
+              {/* Astra */}
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                  🚀
+                </div>
+                <div>
+                  <div className="text-white font-medium">Astra</div>
+                  <div className="text-gray-400 text-sm">AI Assistant</div>
+                </div>
+              </div>
+              
+              {/* Current User */}
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold">
+                  {user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                </div>
+                <div>
+                  <div className="text-white font-medium">
+                    {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'You'} (You)
+                  </div>
+                  <div className="text-gray-400 text-sm">{user?.email}</div>
+                </div>
+              </div>
+              
+              {/* Other Users */}
+              {users.map((member) => (
+                <div key={member.id} className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold">
+                    {member.name?.charAt(0) || member.email.charAt(0)}
+                  </div>
+                  <div>
+                    <div className="text-white font-medium">{member.name || member.email.split('@')[0]}</div>
+                    <div className="text-gray-400 text-sm">{member.email}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-1">

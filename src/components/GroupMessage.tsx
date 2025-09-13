@@ -9,7 +9,74 @@ interface GroupMessageProps {
   onCreateVisualization?: (messageId: string, messageContent: string) => void;
 }
 
-const formatMessageContent = (content: string, mentions: string[]): JSX.Element => {
+const formatMessageContent = (content: string, mentions: string[], isAstraMessage: boolean = false): JSX.Element => {
+  if (isAstraMessage) {
+    // Use the same formatting logic as private chat for Astra messages
+    const lines = content.split('\n');
+    const elements: JSX.Element[] = [];
+    
+    lines.forEach((line, index) => {
+      const trimmedLine = line.trim();
+      
+      // Skip empty lines but add spacing
+      if (!trimmedLine) {
+        elements.push(<br key={`br-${index}`} />);
+        return;
+      }
+      
+      // Handle numbered lists (1. 2. 3. etc.)
+      const numberedListMatch = trimmedLine.match(/^(\d+)\.\s*\*\*(.*?)\*\*:\s*(.*)$/);
+      if (numberedListMatch) {
+        const [, number, title, content] = numberedListMatch;
+        elements.push(
+          <div key={index} className="mb-4">
+            <div className="flex items-start space-x-2">
+              <span className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                {number}
+              </span>
+              <div className="flex-1">
+                <div className="font-bold text-blue-300 mb-1">{title}</div>
+                <div className="text-gray-300 leading-relaxed">{content}</div>
+              </div>
+            </div>
+          </div>
+        );
+        return;
+      }
+      
+      // Handle regular bold text
+      const boldRegex = /\*\*(.*?)\*\*/g;
+      if (boldRegex.test(trimmedLine)) {
+        const parts = trimmedLine.split(boldRegex);
+        const formattedParts = parts.map((part, partIndex) => {
+          if (partIndex % 2 === 1) {
+            return <strong key={partIndex} className="font-bold text-blue-300">{part}</strong>;
+          }
+          return part;
+        });
+        elements.push(<div key={index} className="mb-2">{formattedParts}</div>);
+        return;
+      }
+      
+      // Handle bullet points
+      if (trimmedLine.startsWith('•') || trimmedLine.startsWith('-')) {
+        elements.push(
+          <div key={index} className="flex items-start space-x-2 mb-2 ml-4">
+            <span className="text-blue-400 mt-1">•</span>
+            <span className="text-gray-300">{trimmedLine.substring(1).trim()}</span>
+          </div>
+        );
+        return;
+      }
+      
+      // Regular text
+      elements.push(<div key={index} className="mb-2 text-gray-300">{trimmedLine}</div>);
+    });
+    
+    return <div>{elements}</div>;
+  }
+
+  // Regular user message formatting with mentions
   if (mentions.length === 0) {
     return <span className="text-gray-300">{content}</span>;
   }
@@ -108,17 +175,18 @@ export const GroupMessage: React.FC<GroupMessageProps> = ({
             ? 'bg-gradient-to-br from-gray-700 to-gray-800 text-white border border-blue-500/20'
             : 'bg-gray-700 text-white'
         }`}>
-          <div className="break-words text-sm leading-relaxed">
-            {formatMessageContent(message.message_content, message.mentions)}
-          </div>
-
           {/* Show original prompt for Astra messages */}
           {isAstraMessage && message.astra_prompt && (
-            <div className="mt-2 pt-2 border-t border-gray-600/50">
+            <div className="mb-3 pb-3 border-b border-gray-600/50">
               <div className="text-xs text-gray-400 mb-1">Responding to:</div>
-              <div className="text-xs text-gray-300 italic">"{message.astra_prompt}"</div>
+              <div className="text-sm text-gray-300 italic">"{message.astra_prompt}"</div>
+              <div className="text-xs text-blue-300 mt-1">Asked by {message.user_name}</div>
             </div>
           )}
+
+          <div className="break-words text-sm leading-relaxed">
+            {formatMessageContent(message.message_content, message.mentions, isAstraMessage)}
+          </div>
 
           {/* Visualization button for Astra messages */}
           {isAstraMessage && (onViewVisualization || onCreateVisualization) && (
