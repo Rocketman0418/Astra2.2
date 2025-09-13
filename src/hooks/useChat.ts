@@ -176,7 +176,7 @@ export const useChat = () => {
     toggleMessageExpansion,
     messagesEndRef,
     setMessages,
-    currentConversationId
+    currentConversationId,
     loadConversation
   };
 };
