@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Header } from './Header';
+import { ChatSidebar } from './ChatSidebar';
 import { MessageBubble } from './MessageBubble';
 import { LoadingIndicator } from './LoadingIndicator';
 import { ChatInput } from './ChatInput';
@@ -9,6 +10,8 @@ import { useChat } from '../hooks/useChat';
 import { useVisualization } from '../hooks/useVisualization';
 
 export const ChatContainer: React.FC = () => {
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
+
   const {
     messages,
     isLoading,
@@ -94,34 +97,38 @@ export const ChatContainer: React.FC = () => {
   }
   return (
     <div className="flex flex-col h-screen bg-gray-900">
-      <Header />
+      <ChatSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
-      <div className="flex-1 overflow-y-auto pt-12 pb-20 md:pb-24 px-3 md:px-4">
-        <div className="max-w-4xl mx-auto space-y-3 md:space-y-4">
-          {messages.map((message) => (
-            <div key={message.id} id={`message-${message.id}`}>
-              <MessageBubble
-              message={message}
-              onToggleExpansion={toggleMessageExpansion}
-              onCreateVisualization={generateVisualization}
-              onViewVisualization={showVisualization}
-              visualizationState={getVisualization(message.id)}
-              />
-            </div>
-          ))}
+      <div className={`flex flex-col h-screen transition-all duration-300 ${sidebarOpen ? 'lg:ml-80' : ''}`}>
+        <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+      
+        <div className="flex-1 overflow-y-auto pt-12 pb-20 md:pb-24 px-3 md:px-4">
+          <div className="max-w-4xl mx-auto space-y-3 md:space-y-4">
+            {messages.map((message) => (
+              <div key={message.id} id={`message-${message.id}`}>
+                <MessageBubble
+                message={message}
+                onToggleExpansion={toggleMessageExpansion}
+                onCreateVisualization={generateVisualization}
+                onViewVisualization={showVisualization}
+                visualizationState={getVisualization(message.id)}
+                />
+              </div>
+            ))}
           
-          {isLoading && <LoadingIndicator />}
+            {isLoading && <LoadingIndicator />}
           
-          <div ref={messagesEndRef} />
+            <div ref={messagesEndRef} />
+          </div>
         </div>
-      </div>
 
-      <ChatInput
-        value={inputValue}
-        onChange={setInputValue}
-        onSend={sendMessage}
-        disabled={isLoading}
-      />
+        <ChatInput
+          value={inputValue}
+          onChange={setInputValue}
+          onSend={sendMessage}
+          disabled={isLoading}
+        />
+      </div>
     </div>
   );
 };

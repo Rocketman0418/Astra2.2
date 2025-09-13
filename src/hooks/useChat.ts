@@ -1,9 +1,11 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Message } from '../types';
+import { useChats } from './useChats';
 
 const WEBHOOK_URL = 'https://healthrocket.app.n8n.cloud/webhook/8ec404be-7f51-47c8-8faf-0d139bd4c5e9/chat';
 
 export const useChat = () => {
+  const { logChatMessage, currentMessages, currentConversationId } = useChats();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
@@ -16,6 +18,53 @@ export const useChat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Convert database messages to UI messages
+  useEffect(() => {
+    if (currentMessages.length > 0) {
+      const uiMessages: Message[] = [];
+      
+      currentMessages.forEach((dbMessage) => {
+        // Add user message
+        uiMessages.push({
+          id: `${dbMessage.id}-user`,
+          text: dbMessage.prompt,
+          isUser: true,
+          timestamp: new Date(dbMessage.createdAt)
+        });
+        
+        // Add Astra response
+        uiMessages.push({
+          id: `${dbMessage.id}-astra`,
+          text: dbMessage.response,
+          isUser: false,
+          timestamp: new Date(dbMessage.createdAt)
+        });
+      });
+      
+      setMessages([
+        {
+          id: 'welcome',
+          text: "Welcome back! What can I help you with today?",
+          isUser: false,
+          timestamp: new Date(),
+          isCentered: true
+        },
+        ...uiMessages
+      ]);
+    } else {
+      // Reset to welcome message for new conversations
+      setMessages([
+        {
+          id: 'welcome',
+          text: "Welcome, I'm Astra. What can I help you with today?",
+          isUser: false,
+          timestamp: new Date(),
+          isCentered: true
+        }
+      ]);
+    }
+  }, [currentMessages]);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -74,6 +123,14 @@ export const useChat = () => {
       };
 
       setMessages(prev => [...prev, astraMessage]);
+
+      // Log the chat message to database
+      try {
+        await logChatMessage(text.trim(), messageText, currentConversationId || undefined);
+      } catch (error) {
+        console.error('Failed to log chat message:', error);
+        // Don't block the UI if logging fails
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage: Message = {
@@ -106,6 +163,7 @@ export const useChat = () => {
     sendMessage,
     toggleMessageExpansion,
     messagesEndRef,
-    setMessages
+    setMessages,
+    currentConversationId
   };
 };
