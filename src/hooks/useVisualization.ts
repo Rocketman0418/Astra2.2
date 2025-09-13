@@ -156,7 +156,6 @@ Return only the HTML code - no other text or formatting.`;
       setScrollToMessageId(messageIdToScrollTo);
     }
     setCurrentVisualization(null);
-  }, []);
   }, [messageIdToScrollTo]);
 
   const getVisualization = useCallback((messageId: string) => {
@@ -165,8 +164,8 @@ Return only the HTML code - no other text or formatting.`;
 
   const clearScrollToMessage = useCallback(() => {
     setScrollToMessageId(null);
-    setMessageIdToScrollTo(null);
   }, []);
+  
   return {
     generateVisualization,
     showVisualization,
