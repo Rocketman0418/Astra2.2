@@ -102,7 +102,7 @@ export const ChatContainer: React.FC = () => {
       <div className={`flex flex-col h-screen transition-all duration-300 ${sidebarOpen ? 'lg:ml-80' : ''}`}>
         <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
       
-        <div className="flex-1 overflow-y-auto pt-12 pb-20 md:pb-24 px-3 md:px-4">
+        <div className="flex-1 overflow-y-auto pt-16 pb-20 md:pb-24 px-3 md:px-4">
           <div className="max-w-4xl mx-auto space-y-3 md:space-y-4">
             {messages.map((message) => (
               <div key={message.id} id={`message-${message.id}`}>
