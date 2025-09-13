@@ -28,6 +28,36 @@ export const useChats = () => {
   const [currentMessages, setCurrentMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userProfile, setUserProfile] = useState<{ name: string | null } | null>(null);
+
+  // Fetch user profile data from public.users table
+  const fetchUserProfile = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('name')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return;
+      }
+
+      setUserProfile(data);
+    } catch (err) {
+      console.error('Error in fetchUserProfile:', err);
+    }
+  }, [user]);
+
+  // Fetch user profile when user changes
+  useEffect(() => {
+    if (user) {
+      fetchUserProfile();
+    }
+  }, [user, fetchUserProfile]);
 
   // Generate a new conversation ID
   const createNewConversation = useCallback(() => {
@@ -53,11 +83,8 @@ export const useChats = () => {
     try {
       const chatConversationId = conversationId || currentConversationId || createNewConversation();
       
-      // Get user name from user metadata or profile
-      const userName = user.user_metadata?.full_name || 
-                      user.user_metadata?.name || 
-                      user.identities?.[0]?.identity_data?.full_name ||
-                      user.identities?.[0]?.identity_data?.name ||
+      // Get user name from the users table, with fallbacks
+      const userName = userProfile?.name || 
                       user.email?.split('@')[0] || 
                       'Unknown User';
       
