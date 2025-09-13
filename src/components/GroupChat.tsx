@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Search, Users, X } from 'lucide-react';
 import { GroupMessage } from './GroupMessage';
 import { MentionInput } from './MentionInput';
@@ -108,7 +108,7 @@ export const GroupChat: React.FC = () => {
   };
 
   // Handle visualization creation
-  const handleCreateVisualization = async (messageId: string, messageContent: string) => {
+  const handleCreateVisualization = useCallback(async (messageId: string, messageContent: string) => {
     console.log('🎯 Starting visualization generation for message:', messageId);
     
     // Set generating state immediately
@@ -155,7 +155,7 @@ export const GroupChat: React.FC = () => {
         [messageId]: { isGenerating: false, content: null }
       }));
     }
-  };
+  }, [generateVisualization, getVisualization, updateVisualizationData]);
 
   // Handle viewing visualization
   const handleViewVisualization = (messageId: string, visualizationData: string) => {
