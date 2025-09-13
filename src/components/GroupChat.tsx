@@ -16,11 +16,16 @@ interface User {
   email: string;
 }
 
+interface UserWithCurrentFlag extends User {
+  isCurrentUser?: boolean;
+}
+
 export const GroupChat: React.FC = () => {
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [inputValue, setInputValue] = useState('');
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserWithCurrentFlag[]>([]);
+  const [currentUserData, setCurrentUserData] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
@@ -45,6 +50,18 @@ export const GroupChat: React.FC = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+        // Fetch current user data
+        const { data: currentUser, error: currentUserError } = await supabase
+          .from('users')
+          .select('id, name, email')
+          .eq('id', user?.id)
+          .single();
+
+        if (!currentUserError && currentUser) {
+          setCurrentUserData(currentUser);
+        }
+
+        // Fetch other users
         const { data, error } = await supabase
           .from('users')
           .select('id, name, email')
@@ -185,22 +202,24 @@ export const GroupChat: React.FC = () => {
                 </div>
                 <div>
                   <div className="text-white font-medium">Astra</div>
-                  <div className="text-gray-400 text-sm">AI Assistant</div>
+                  <div className="text-gray-400 text-sm">AI Intelligence</div>
                 </div>
               </div>
               
               {/* Current User */}
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold">
-                  {user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
-                </div>
-                <div>
-                  <div className="text-white font-medium">
-                    {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'You'} (You)
+              {currentUserData && (
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold">
+                    {currentUserData.name?.charAt(0) || currentUserData.email.charAt(0)}
                   </div>
-                  <div className="text-gray-400 text-sm">{user?.email}</div>
+                  <div>
+                    <div className="text-white font-medium">
+                      {currentUserData.name || currentUserData.email.split('@')[0]}
+                    </div>
+                    <div className="text-gray-400 text-sm">{currentUserData.email}</div>
+                  </div>
                 </div>
-              </div>
+              )}
               
               {/* Other Users */}
               {users.map((member) => (
