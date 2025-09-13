@@ -6,6 +6,7 @@ export const useVisualization = () => {
   const [visualizations, setVisualizations] = useState<Record<string, VisualizationState>>({});
   const [currentVisualization, setCurrentVisualization] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [scrollToMessageId, setScrollToMessageId] = useState<string | null>(null);
 
   const generateVisualization = useCallback(async (messageId: string, messageText: string) => {
     setIsGenerating(true);
@@ -154,12 +155,17 @@ Return only the HTML code - no other text or formatting.`;
     return visualizations[messageId] || null;
   }, [visualizations]);
 
+  const clearScrollToMessage = useCallback(() => {
+    setScrollToMessageId(null);
+  }, []);
   return {
     generateVisualization,
     showVisualization,
     hideVisualization,
     getVisualization,
     currentVisualization,
-    isGenerating
+    isGenerating,
+    scrollToMessageId,
+    clearScrollToMessage
   };
 };

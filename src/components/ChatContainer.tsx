@@ -25,7 +25,9 @@ export const ChatContainer: React.FC = () => {
     hideVisualization,
     getVisualization,
     currentVisualization,
-    isGenerating
+    isGenerating,
+    scrollToMessageId,
+    clearScrollToMessage
   } = useVisualization();
   // Register service worker for PWA
   useEffect(() => {
@@ -49,7 +51,17 @@ export const ChatContainer: React.FC = () => {
 
   // Handle viewport adjustments for mobile keyboards
   useEffect(() => {
-    // Scroll to bottom immediately when messages change
+    // If we need to scroll to a specific message, do that instead
+    if (scrollToMessageId) {
+      const messageElement = document.getElementById(`message-${scrollToMessageId}`);
+      if (messageElement) {
+        messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        clearScrollToMessage();
+        return;
+      }
+    }
+    
+    // Otherwise, scroll to bottom when messages change
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     
     const handleResize = () => {
@@ -61,7 +73,7 @@ export const ChatContainer: React.FC = () => {
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [messagesEndRef, messages]);
+  }, [messagesEndRef, messages, scrollToMessageId, clearScrollToMessage]);
 
   // Show loading view when generating visualization
   if (isGenerating) {
@@ -87,14 +99,15 @@ export const ChatContainer: React.FC = () => {
       <div className="flex-1 overflow-y-auto pt-12 pb-20 md:pb-24 px-3 md:px-4">
         <div className="max-w-4xl mx-auto space-y-3 md:space-y-4">
           {messages.map((message) => (
-            <MessageBubble
-              key={message.id}
+            <div key={message.id} id={`message-${message.id}`}>
+              <MessageBubble
               message={message}
               onToggleExpansion={toggleMessageExpansion}
               onCreateVisualization={generateVisualization}
               onViewVisualization={showVisualization}
               visualizationState={getVisualization(message.id)}
-            />
+              />
+            </div>
           ))}
           
           {isLoading && <LoadingIndicator />}
