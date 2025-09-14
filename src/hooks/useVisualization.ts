@@ -180,7 +180,7 @@ Return only the HTML code - no other text or formatting.`;
         }
       }
     }, 100);
-  }, [messageIdToScrollTo]);
+  }, [messageToHighlight, savedScrollPosition]);
 
   const getVisualization = useCallback((messageId: string) => {
     return visualizations[messageId] || null;
