@@ -112,9 +112,6 @@ Return only the HTML code - no other text or formatting.`;
         }
       }));
 
-      // Automatically show the visualization after generation
-      setCurrentVisualization(messageId);
-      
       // Note: Database update will be handled by the calling component
     } catch (error) {
       console.error('❌ Error generating visualization:', error);
