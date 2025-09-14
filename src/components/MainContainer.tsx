@@ -8,7 +8,7 @@ import { ChatMode } from '../types';
 
 export const MainContainer: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [chatMode, setChatMode] = useState<ChatMode>('private');
+  const [chatMode, setChatMode] = useState<ChatMode>('team');
   const [conversationToLoad, setConversationToLoad] = useState<string | null>(null);
   const [shouldStartNewChat, setShouldStartNewChat] = useState(false);
 
