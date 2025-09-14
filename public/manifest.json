@@ -8,17 +8,17 @@
   "theme_color": "#2563eb",
   "icons": [
     {
-      "src": "/RocketHub Logo Alt 1 Small.png",
+      "src": "/RocketHub Favicon.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/RocketHub Logo Alt 1 Small.png",
+      "src": "/RocketHub Favicon.png",
       "sizes": "512x512",
       "type": "image/png"
     },
     {
-      "src": "/RocketHub Logo Alt 1 Small.png",
+      "src": "/RocketHub Favicon.png",
       "sizes": "any",
       "type": "image/png",
       "purpose": "any maskable"
